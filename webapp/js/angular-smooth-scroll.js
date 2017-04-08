@@ -138,11 +138,13 @@
 			 * Scroll the page by an increment, and check if it's time to stop
 			 */
 			var animateScroll = function () {
+
 			    var newEnd = getEndLocation(element);
 			    if (endLocation != newEnd) {
 			        endLocation = newEnd;
 			        distance = endLocation - startLocation;
 			    }
+
 				timeLapsed += 16;
 				percentage = ( timeLapsed / duration );
 				percentage = ( percentage > 1 ) ? 1 : percentage;
@@ -235,8 +237,7 @@
 				var targetElement;
 
 				$elem.on('click', function(e) {
-					e.preventDefault();
-
+					//e.preventDefault();
 					targetElement = document.getElementById($attrs.scrollTo);
 					if ( !targetElement ) return;
 

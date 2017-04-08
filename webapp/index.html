@@ -42,10 +42,10 @@
       <script src="https://oss.maxcdn.com/html5shiv/3.7.2/html5shiv.min.js"></script>
       <script src="https://oss.maxcdn.com/respond/1.4.2/respond.min.js"></script>
     <![endif]-->
-  <script type="text/javascript">
+<!--  <script type="text/javascript">
       angular.element(document.getElementsByTagName('head')).append(angular.element('<base href="' + window.location.pathname + '" />'));
       alert(window.location.pathname);
-  </script>
+  </script>-->
 <!--  <base href="/" />-->
   </head>
   <body ng-app="librarianApp" ng-controller="librarianController">
@@ -67,9 +67,9 @@
 
                     <!-- Collect the nav links, forms, and other content for toggling -->
                     <div class="collapse navbar-collapse" id="navBarMenu"><!-- EXid: id="bs-example-navbar-collapse-1"-->
-                      <ul class="nav navbar-nav navbar-right"  scroll-to="content">
-                        <li><a href="justForTheSakeOfOtherwise">Home</a></li>
-                        <li><a href="listBooks">List Books</a></li>
+                      <ul class="nav navbar-nav navbar-right" scroll-to="scrollToDiv">
+                        <li><a href="#!/">Home</a></li>
+                        <li><a href="#!/listBooks">List Books</a></li>
                         <li><a href="">Manage Books</a></li>                        
                         <li><a href="">List Requests</a></li>
                         <li><a href="">Contact</a></li>
@@ -84,8 +84,8 @@
                     <div class="media-left media-middle">
                         <h1>Unbelievable Library Application</h1>
                         <h3>so unbelievable, it also amazes me <br /> <small>responsive af</small></h3>
-                        <br><!--
-                        <a href="#tf-contact" class="btn btn-primary my-btn">Contact</a>
+                        <br>
+<!--                        <a href="#tf-contact" class="btn btn-primary my-btn">Contact</a>
                         <a href="#tf-portfolio" class="btn btn-primary my-btn2">Register</a>-->
                     </div>
                     <div class="media-right" ng-controller="SignInCtrl">
@@ -104,7 +104,8 @@
         </div>
     </div>
 
-    <div id="content" class="container" ng-view>
+    <div id="scrollToDiv" />
+    <div id="actualContent" class="container" ng-view>
    
     </div>
 

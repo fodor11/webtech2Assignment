@@ -6,17 +6,17 @@ users = [{ id: 1, email: "li@li.li", password: "su", type: "librarian" },
 /// Librarian Application 
 var librarianApp = angular.module('librarianApp', ['smoothScroll', 'ngRoute']);
 
-librarianApp.config(function ($routeProvider, $locationProvider) {
+librarianApp.config(function ($routeProvider) {
     $routeProvider
-    .when('/listBooks', {
-        templateUrl: 'listBooks.htm'
-    })
-    .otherwise({
-        templateUrl: 'services.htm',
+    .when('/', {
+        templateUrl: 'services.html',
         controller: 'servicesController'
+    })
+    .when('/listBooks', {
+        templateUrl: 'listBooks.html'
     });
-    $locationProvider.html5Mode(true);
 });
+
 
 librarianApp.controller('librarianController', function ($scope, $http) {
     angular.element(document).ready(function () {
