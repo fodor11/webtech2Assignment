@@ -30,8 +30,8 @@
 		options = options || {};
 
 		// Options
-		var duration = options.duration || 800,
-			offset = options.offset || 0,
+		var duration = options.duration || 1000,
+			offset = options.offset || 75,
 			easing = options.easing || 'easeInOutQuart',
 			callbackBefore = options.callbackBefore || function() {},
 			callbackAfter = options.callbackAfter || function() {},
@@ -138,6 +138,11 @@
 			 * Scroll the page by an increment, and check if it's time to stop
 			 */
 			var animateScroll = function () {
+			    var newEnd = getEndLocation(element);
+			    if (endLocation != newEnd) {
+			        endLocation = newEnd;
+			        distance = endLocation - startLocation;
+			    }
 				timeLapsed += 16;
 				percentage = ( timeLapsed / duration );
 				percentage = ( percentage > 1 ) ? 1 : percentage;

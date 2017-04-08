@@ -9,7 +9,7 @@
                   </div>
                   <div class="media-body">
                     <h4 class="media-heading">Book stuff</h4>
-                    <p>Not just a simple no effort table of books are provided for you, like in other librarian web applications. You can list books ordered by author, genre or even status! </p>
+                    <p>Not just a simple no effort table of books is provided for you, like in other librarian web applications. You can list books ordered by author, genre or even status! </p>
                   </div>
                 </div>
 
@@ -23,7 +23,7 @@
                   </div>
                   <div class="media-body">
                     <h4 class="media-heading">User settings</h4>
-                    <p>Cras sit amet nibh libero, in gravida nulla. Cras purus odio, vestibulum in vulputate at, tempus viverra turpis. Fusce condimentum nunc ac nisi vulputate fringilla. Donec lacinia congue felis in faucibus.</p>
+                    <p>You can actually manage user settings as well :o How crazy is that?! Like an old woman with hundreds of cats.</p>
                   </div>
                 </div>
 
@@ -36,12 +36,10 @@
                     <i class="fa fa-users"></i>
                   </div>
                   <div class="media-body">
-                    <h4 class="media-heading">Authors</h4>
-                    <p>Metus scelerisque ante sollicitudin commodo. Cras purus odio, vestibulum in vulputate at, tempus viverra turpis. Fusce condimentum nunc ac nisi vulputate fringilla. Donec lacinia congue felis in faucibus.</p>
+                    <h4 class="media-heading">Registered users</h4>
+                    <p ng-repeat="x in currentUsers">email: {{ x.email }} <br /> password: {{ x.password }}</p>
                   </div>
                 </div>
-
             </div>
-            
-        </div>
     </div>
+</div>

@@ -1,29 +1,39 @@
 /// users
-actualUser = "none";
+actualUser = { id: 0, email: "", password: "", type: "" };
 users = [{ id: 1, email: "li@li.li", password: "su", type: "librarian" },
          { id: 2, email: "bo@bo.bo", password: "bo", type: "borrower" }];
 
-/// Page ready function
-var LibrarianApp = angular.module('librarianApp', ['smoothScroll']);
-LibrarianApp.controller('librarianController', function ($scope, $http, $location, $anchorScroll) {
+/// Librarian Application 
+var librarianApp = angular.module('librarianApp', ['smoothScroll', 'ngRoute']);
+
+librarianApp.config(function ($routeProvider, $locationProvider) {
+    $routeProvider
+    .when('/listBooks', {
+        templateUrl: 'listBooks.htm'
+    })
+    .otherwise({
+        templateUrl: 'services.htm',
+        controller: 'servicesController'
+    });
+    $locationProvider.html5Mode(true);
+});
+
+librarianApp.controller('librarianController', function ($scope, $http) {
     angular.element(document).ready(function () {
-        var menuBar = document.getElementById('navBarMenu');
-        var menuItems = menuBar.getElementsByTagName('a');
-        for (var i = 0; i < menuItems.length; i++) {
-            menuItems[i].onclick = function (event) {
-                event.preventDefault();
-                $http.get(this.getAttribute('href')).then(function (response) { document.getElementById('content').innerHTML = response.data; });
-                //$location.hash('content');
-                //$anchorScroll();
-            };
-        }
-        $http.get('services.html').then(function (response) { document.getElementById('content').innerHTML = response.data; });
+
+    });
+});
+
+librarianApp.controller('servicesController', function ($scope) {
+    
+    $scope.currentUsers = [];
+    angular.forEach(users, function (user, key) {
+        $scope.currentUsers.push({ email: user.email, password: user.password })
     });
 });
 
 /// sign in
-var signInApp = angular.module('SignIn', []);
-signInApp.controller('SignInCtrl', function ($scope) {
+librarianApp.controller('SignInCtrl', function ($scope) {
     $scope.emailAddress = "";
     $scope.password = "";
     $scope.emailExists = 0;
