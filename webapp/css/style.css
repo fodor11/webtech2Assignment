@@ -126,6 +126,10 @@ a:focus{
 	padding: 7% 0; 
 }
 
+#tf-header .media-right{
+	min-width: 36.5%;
+}
+
 .media-left.media-middle i {
 	padding: 20px 30px 20px 0;
 	font-size: 30px;
@@ -181,8 +185,9 @@ a.btn.btn-primary.my-btn.dark:hover{
 	color: #ffffff;
 	border-color: transparent;
 }
-a.btn.btn-primary.my-btn2 {
+button.btn.btn-primary.my-btn2 {
 	background: rgba(47, 147, 123, 0);
+	margin: 5px;
 	border-color: #FFFFFF;
 	border-radius: 0px;
 	border-width: 2px;
@@ -194,7 +199,7 @@ a.btn.btn-primary.my-btn2 {
 	color: #FFFFFF;
 }
 
-a.btn.btn-primary.my-btn2:hover{
+button.btn.btn-primary.my-btn2:hover{
 	background: #2F937B;
 	color: #ffffff;
 	border-color: transparent;
@@ -299,4 +304,8 @@ nav#tf-footer {
 	background: #222222;
 	padding: 3% 0 2% 0;
 	color: #f1f1f1;
+}
+
+.ng-hide {
+  height: 0;
 }

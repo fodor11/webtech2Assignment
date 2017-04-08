@@ -5102,9 +5102,6 @@ a.thumbnail.active {
   display: table-cell;
   vertical-align: top;
 }
-.media-right {
- min-width: 36%;
-}
 
 .media-middle {
   vertical-align: middle;
