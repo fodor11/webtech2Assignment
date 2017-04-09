@@ -1,7 +1,7 @@
 /// Librarian Application 
 var librarianApp = angular.module('librarianApp', ['smoothScroll', 'ngRoute']);
 
-/// ------------------------------------Routing------------------------------------
+/// ------------------------------------Routing------------------------------------ ///
 librarianApp.config(function ($routeProvider) {
     $routeProvider
     .when('/', {
@@ -29,7 +29,7 @@ librarianApp.config(function ($routeProvider) {
     });
 });
 
-/// ------------------------------------Services------------------------------------
+/// ------------------------------------Services------------------------------------ ///
 librarianApp.factory('userService', function () {
     var userServiceInstance = {};
     userServiceInstance.actualUser = { id: 0, name: "Anonymous", email: "", password: "", type: "borrower", gender: "none", age: "0" };
@@ -68,10 +68,17 @@ librarianApp.factory('userService', function () {
     return userServiceInstance;
 });
 
-/// ------------------------------------Controllers------------------------------------
+/// ------------------------------------Controllers------------------------------------ ///
 librarianApp.controller('librarianController', function ($scope, $http, userService) {
     angular.element(document).ready(function () {
-
+        $http.get("http://localhost:8081/getUsers")
+        .then(function successCallback(data) {
+            var getUsers = data.users;
+            alert('id: ' + getUsers[0].id + "name: " + getUsers[0].name);
+            alert('id: ' + getUsers[1].id + "name: " + getUsers[1].name);
+        }, function errorCallback(data) {
+            alert('Could not get users :(  -> ' + data);
+        });
     });
 });
 
