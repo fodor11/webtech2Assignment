@@ -1,24 +1,7 @@
-/// users
-actualUser = { id: 0, name: "Anonymous", email: "", password: "", type: "borrower", gender: "none", age: "0" };
-users = [{ id: 1, name: "Marvelous Librarian", email: "li@li.li", password: "li", type: "librarian", gender: "male", age: "50" },
-         { id: 2, name: "Marvelous Borrower", email: "bo@bo.bo", password: "bo", type: "borrower", gender: "female", age: "24" }];
-function getUserByEmail(email) {
-    var userToReturn = { id: 0, name: "", email: "", password: "", type: "", gender: "", age: "" };
-    angular.forEach(users, function (user, key) {
-        angular.forEach(user, function (value, key) {
-            if (key == "email") {
-                if (value == email) {
-                    userToReturn = user;
-                }
-            }
-        });
-    });
-    return userToReturn;
-}
-
 /// Librarian Application 
 var librarianApp = angular.module('librarianApp', ['smoothScroll', 'ngRoute']);
 
+/// ------------------------------------Routing------------------------------------
 librarianApp.config(function ($routeProvider) {
     $routeProvider
     .when('/', {
@@ -46,22 +29,58 @@ librarianApp.config(function ($routeProvider) {
     });
 });
 
+/// ------------------------------------Services------------------------------------
+librarianApp.factory('userService', function () {
+    var userServiceInstance = {};
+    userServiceInstance.actualUser = { id: 0, name: "Anonymous", email: "", password: "", type: "borrower", gender: "none", age: "0" };
+    userServiceInstance.users = [{ id: 1, name: "Marvelous Librarian", email: "li@li.li", password: "li", type: "librarian", gender: "male", age: "50" },
+                                 { id: 2, name: "Marvelous Borrower", email: "bo@bo.bo", password: "bo", type: "borrower", gender: "female", age: "24" }];
+    userServiceInstance.getUserByEmail = function (email) {
+        var userToReturn = { id: 0, name: "", email: "", password: "", type: "", gender: "", age: "" };
+        angular.forEach(userServiceInstance.users, function (user, key) {
+            angular.forEach(user, function (value, key) {
+                if (key == "email") {
+                    if (value == email) {
+                        userToReturn = user;
+                    }
+                }
+            });
+        });
+        return userToReturn;
+    }
+    userServiceInstance.addNewUser = function (newUser) {
+        userServiceInstance.users.push(newUser);
+    }
+    userServiceInstance.generateNewId = function () {
+        var newId = 0;
+        angular.forEach(userServiceInstance.users, function (user, key) {
+            angular.forEach(user, function (value, key) {
+                if (key == "id") {
+                    if (value > newId) {
+                        newId = value;
+                    }
+                }
+            });
+        });
+        newId = newId + 1;
+        return newId;
+    }
+    return userServiceInstance;
+});
 
-librarianApp.controller('librarianController', function ($scope, $http) {
+/// ------------------------------------Controllers------------------------------------
+librarianApp.controller('librarianController', function ($scope, $http, userService) {
     angular.element(document).ready(function () {
 
     });
 });
 
-librarianApp.controller('servicesController', function ($scope) {    
-    $scope.currentUsers = [];
-    angular.forEach(users, function (user, key) {
-        $scope.currentUsers.push({ email: user.email, password: user.password })
-    });
+librarianApp.controller('servicesController', function ($scope, userService) {
+    $scope.currentUsers = userService.users;
 });
 
 /// sign in
-librarianApp.controller('SignInCtrl', function ($scope, $location) {
+librarianApp.controller('SignInCtrl', function ($scope, $location, userService) {
     $scope.emailAddress = "";
     $scope.password = "";
     $scope.emailExists = false;
@@ -71,23 +90,22 @@ librarianApp.controller('SignInCtrl', function ($scope, $location) {
     $scope.borrower = false;
     $scope.loggedIn = false;
 
-    $scope.user = {};
+    $scope.user = userService.actualUser;
 
     $scope.checkExistingEmail = function () {
         $scope.emailExists = false;
-        $scope.user = getUserByEmail($scope.emailAddress);
-        actualUser = $scope.user;
-        if ($scope.user.id != 0) {
+        userService.actualUser = userService.getUserByEmail($scope.emailAddress);
+        $scope.user = userService.actualUser;
+        if (userService.actualUser.id != 0) {
             $scope.emailExists = true;
         }
     };
 
     $scope.login = function () {
-        //check passwd, set loggedIn & type
-        if ($scope.password == $scope.user.password) {
+        if ($scope.password == userService.actualUser.password) {
             $scope.loggedIn = true;
             $scope.incorrectPassword = false;
-            if ($scope.user.type == "borrower") {
+            if (userService.actualUser.type == "borrower") {
                 $scope.borrower = true;
             }
             else {
@@ -99,7 +117,12 @@ librarianApp.controller('SignInCtrl', function ($scope, $location) {
         }
     };
     $scope.register = function () {
-        //alert("register email: " + $scope.emailAddress + "\n password: " + $scope.password);
+        if ($scope.signForm.emailAdd.$valid && $scope.signForm.password.$valid) {
+            userService.addNewUser({ id: userService.generateNewId(), name: "Anonymous", email: $scope.emailAddress, password: $scope.password, type: "borrower", gender: "none", age: "0" });
+            userService.actualUser = userService.getUserByEmail($scope.emailAddress);
+            $scope.user = userService.actualUser;
+            $scope.login();
+        }
     };
     $scope.logout = function () {
         $scope.loggedIn = false;
@@ -109,8 +132,8 @@ librarianApp.controller('SignInCtrl', function ($scope, $location) {
         $scope.password = "";
         $scope.emailExists = false;
         $scope.incorrectPassword = false;
-        $scope.user = { id: "0" };
-        actualUser = $scope.user;
+        userService.actualUser.id =  0;
+        $scope.user = userService.actualUser;
         $location.path("/");
     }
 });

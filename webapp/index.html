@@ -97,9 +97,9 @@
                     <div class="media-right media-middle" ng-show="!loggedIn">
                         <form id="signIn" class="form-signin" name="signForm">
                             <h3 class="form-signin-heading">Sign In</h3>
-                            <p><input type="email" name="emailAdd" class="form-control" placeholder="Email" required="1" ng-model="emailAddress" ng-blur="checkExistingEmail()"/></p>  
+                            <p><input type="email" name="emailAdd" class="form-control" placeholder="Email" required ng-model="emailAddress" ng-blur="checkExistingEmail()"/></p>  
                             <p ng-show="signForm.emailAdd.$error.email">Please enter a valid email address</p>
-                            <p><input type="password" class="form-control" placeholder="Password" required="1" ng-model="password"/></p> 
+                            <p><input type="password" name="password" class="form-control" placeholder="Password" required ng-model="password"/></p> 
                             <p ng-show="incorrectPassword">Incorrect Password!</p>
                             <button class="btn btn-primary my-btn" type="submit" ng-disabled="!emailExists" ng-click="login()">Log in</button>
                             <button class="btn btn-primary my-btn" type="submit" ng-disabled="emailExists" ng-click="register()">Register</button>
