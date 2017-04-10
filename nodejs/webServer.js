@@ -1,6 +1,7 @@
 var express = require('express');
 var app = express();
 var path = require('path');
+var fs = require('fs');
 
 /// --------------------------------------- ""Database"" --------------------------------------- ///
 var usersArray = {
@@ -29,12 +30,18 @@ app.delete('/deleteUser', function (req, res) {
 
 })
 
-/// --------------------------------------- Get files from directories --------------------------------------- ///
-app.get('/:filename', function (req, res) {
-    res.sendFile(path.join(__dirname, '../webapp', req.params.filename));
-})
-app.get('/:dir/:filename', function (req, res) {
-    res.sendFile(path.join(__dirname, '../webapp/' + req.params.dir, req.params.filename));
+/// ---------------- Get files from directories/or homepage in case path is invalid ---------------- ///
+app.get('/*', function (req, res) {
+    var fullPath = path.join(__dirname, '../webapp/', req.params[0]);
+    
+    if (fs.existsSync(fullPath)) {
+        res.sendFile(fullPath);
+    }
+    else {
+        //res.sendFile(path.join(__dirname, '../webapp', 'index.html'));
+        res.end('<h2>Well, well, what were you trying to reach if i may ask you kindly?</h2> \
+                <p>The homepage is right <a href="/">this way</a> sir.</p>');
+    }
 })
 
 

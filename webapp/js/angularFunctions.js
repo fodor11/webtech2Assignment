@@ -99,7 +99,6 @@ librarianApp.controller('SignInCtrl', function ($scope, $location, userService) 
     $scope.checkExistingEmail = function () {
         $scope.emailExists = false;
         userService.actualUser = JSON.parse(JSON.stringify(userService.getUserByEmail($scope.emailAddress)));
-        console.log($scope.user.id + ' == ' + userService.actualUser.id);
         $scope.user = userService.actualUser;
         if (userService.actualUser.id != 0) {
             $scope.emailExists = true;
@@ -124,7 +123,7 @@ librarianApp.controller('SignInCtrl', function ($scope, $location, userService) 
     $scope.register = function () {
         if ($scope.signForm.emailAdd.$valid && $scope.signForm.password.$valid) {
             userService.addNewUser({ id: userService.generateNewId(), name: "Anonymous", email: $scope.emailAddress, password: $scope.password, type: "borrower", gender: "none", age: "0" });
-            userService.actualUser = userService.getUserByEmail($scope.emailAddress);
+            userService.actualUser = JSON.parse(JSON.stringify(userService.getUserByEmail($scope.emailAddress)));
             $scope.user = userService.actualUser;
             $scope.login();
         }
@@ -137,8 +136,7 @@ librarianApp.controller('SignInCtrl', function ($scope, $location, userService) 
         $scope.password = "";
         $scope.emailExists = false;
         $scope.incorrectPassword = false;
-        userService.actualUser.id =  0;
-        $scope.user = userService.actualUser;
+        userService.actualUser.id = 0;
         $location.path("/");
     }
 });
