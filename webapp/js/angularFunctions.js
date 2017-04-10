@@ -1,7 +1,7 @@
 /// Librarian Application 
 var librarianApp = angular.module('librarianApp', ['smoothScroll', 'ngRoute']);
 
-/// ------------------------------------Routing------------------------------------ ///
+/// ------------------------------------ Routing ------------------------------------ ///
 librarianApp.config(function ($routeProvider) {
     $routeProvider
     .when('/', {
@@ -29,12 +29,11 @@ librarianApp.config(function ($routeProvider) {
     });
 });
 
-/// ------------------------------------Services------------------------------------ ///
+/// ------------------------------------ Services ------------------------------------ ///
 librarianApp.factory('userService', function () {
     var userServiceInstance = {};
     userServiceInstance.actualUser = { id: 0, name: "Anonymous", email: "", password: "", type: "borrower", gender: "none", age: "0" };
-    userServiceInstance.users = [{ id: 1, name: "Marvelous Librarian", email: "li@li.li", password: "li", type: "librarian", gender: "male", age: "50" },
-                                 { id: 2, name: "Marvelous Borrower", email: "bo@bo.bo", password: "bo", type: "borrower", gender: "female", age: "24" }];
+    userServiceInstance.users = [];
     userServiceInstance.getUserByEmail = function (email) {
         var userToReturn = { id: 0, name: "", email: "", password: "", type: "", gender: "", age: "" };
         angular.forEach(userServiceInstance.users, function (user, key) {
@@ -68,16 +67,14 @@ librarianApp.factory('userService', function () {
     return userServiceInstance;
 });
 
-/// ------------------------------------Controllers------------------------------------ ///
+/// ------------------------------------ Controllers ------------------------------------ ///
 librarianApp.controller('librarianController', function ($scope, $http, userService) {
     angular.element(document).ready(function () {
-        $http.get("http://localhost:8081/getUsers")
-        .then(function successCallback(data) {
-            var getUsers = data.users;
-            alert('id: ' + getUsers[0].id + "name: " + getUsers[0].name);
-            alert('id: ' + getUsers[1].id + "name: " + getUsers[1].name);
-        }, function errorCallback(data) {
-            alert('Could not get users :(  -> ' + data);
+        $http.get("/getUsers")
+        .then(function successCallback(response) {
+            userService.users = response.data.users;
+        }, function errorCallback(reponse) {
+            alert('Could not get users :(');
         });
     });
 });
@@ -101,7 +98,8 @@ librarianApp.controller('SignInCtrl', function ($scope, $location, userService) 
 
     $scope.checkExistingEmail = function () {
         $scope.emailExists = false;
-        userService.actualUser = userService.getUserByEmail($scope.emailAddress);
+        userService.actualUser = JSON.parse(JSON.stringify(userService.getUserByEmail($scope.emailAddress)));
+        console.log($scope.user.id + ' == ' + userService.actualUser.id);
         $scope.user = userService.actualUser;
         if (userService.actualUser.id != 0) {
             $scope.emailExists = true;
