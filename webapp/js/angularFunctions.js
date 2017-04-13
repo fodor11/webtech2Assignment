@@ -5,8 +5,7 @@ var librarianApp = angular.module('librarianApp', ['smoothScroll', 'ngRoute']);
 librarianApp.config(function ($routeProvider) {
     $routeProvider
     .when('/', {
-        templateUrl: 'services.html',
-        controller: 'servicesController'
+        templateUrl: 'services.html'
     })
     .when('/manageBooks', {
         templateUrl: 'manageBooks.html'
@@ -21,7 +20,8 @@ librarianApp.config(function ($routeProvider) {
         templateUrl: 'listBooks.html'
     })
     .when('/userSettings', {
-        templateUrl: 'userSettings.html'
+        templateUrl: 'userSettings.html',
+        controller: 'userSettingsCtrl'
     })
     .otherwise({
         templateUrl: 'services.html',
@@ -30,61 +30,74 @@ librarianApp.config(function ($routeProvider) {
 });
 
 /// ------------------------------------ Services ------------------------------------ ///
-librarianApp.factory('userService', function () {
+librarianApp.factory('userService', function ($http, $q) {
     var userServiceInstance = {};
-    userServiceInstance.actualUser = { id: 0, name: "Anonymous", email: "", password: "", type: "borrower", gender: "none", age: "0" };
-    userServiceInstance.users = [];
+
     userServiceInstance.getUserByEmail = function (email) {
-        var userToReturn = { id: 0, name: "", email: "", password: "", type: "", gender: "", age: "" };
-        angular.forEach(userServiceInstance.users, function (user, key) {
-            angular.forEach(user, function (value, key) {
-                if (key == "email") {
-                    if (value == email) {
-                        userToReturn = user;
-                    }
-                }
-            });
+        var deferred = $q.defer();
+        $http.get("/getUserByEmail/" + email)
+        .then(function successCallback(response) {
+            deferred.resolve(response.data);
+            
+        }, function errorCallback(reponse) {
+            alert('Could not get user by email :( \n email: ' + email);
+            return deferred.reject(response.data);
         });
-        return userToReturn;
+        return deferred.promise;
     }
+
+    userServiceInstance.getUsers = function () {
+        var deferred = $q.defer();
+        $http.get("/getUsers")
+        .then(function successCallback(response) {
+            deferred.resolve(response.data);
+        }, function errorCallback(reponse) {
+            alert('Could not get users :(');
+            return deferred.reject(response.data);
+        });
+        return deferred.promise;
+    }
+
     userServiceInstance.addNewUser = function (newUser) {
-        userServiceInstance.users.push(newUser);
-    }
-    userServiceInstance.generateNewId = function () {
-        var newId = 0;
-        angular.forEach(userServiceInstance.users, function (user, key) {
-            angular.forEach(user, function (value, key) {
-                if (key == "id") {
-                    if (value > newId) {
-                        newId = value;
-                    }
-                }
-            });
+        var deferred = $q.defer();
+        $http.post("/addUser", newUser)
+        .then(function successCallback(response) {
+            deferred.resolve(response.data);
+        }, function errorCallback(reponse) {
+            alert('Could not add user :(');
+            return deferred.reject(response.data);
         });
-        newId = newId + 1;
-        return newId;
+        return deferred.promise;
     }
+
+    userServiceInstance.deleteUser = function (idToDelete) {
+        var deferred = $q.defer();
+        $http.delete("/deleteUser/" + idToDelete)
+        .then(function successCallback(response) {
+            deferred.resolve(response);
+        }, function errorCallback(reponse) {
+            alert('Could not delete user :(');
+            return deferred.reject(response);
+        });
+        return deferred.promise;
+    }
+
     return userServiceInstance;
 });
 
 /// ------------------------------------ Controllers ------------------------------------ ///
-librarianApp.controller('librarianController', function ($scope, $http, userService) {
-    angular.element(document).ready(function () {
-        $http.get("/getUsers")
-        .then(function successCallback(response) {
-            userService.users = response.data.users;
-        }, function errorCallback(reponse) {
-            alert('Could not get users :(');
-        });
+librarianApp.controller('librarianController', function ($scope, userService, $http) {
+    $scope.actualUser = { id: 0, name: "Anonymous", email: "", password: "", type: "borrower", gender: "none", age: "0" };
+    $scope.users = [];
+
+    userService.getUsers()
+    .then(function (result) {
+        $scope.users = result;
     });
 });
 
-librarianApp.controller('servicesController', function ($scope, userService) {
-    $scope.currentUsers = userService.users;
-});
-
-/// sign in
-librarianApp.controller('SignInCtrl', function ($scope, $location, userService) {
+/// Sign in
+librarianApp.controller('signInCtrl', function ($scope, $location, userService, $http) {
     $scope.emailAddress = "";
     $scope.password = "";
     $scope.emailExists = false;
@@ -92,24 +105,30 @@ librarianApp.controller('SignInCtrl', function ($scope, $location, userService) 
 
     $scope.librarian = false;
     $scope.borrower = false;
-    $scope.loggedIn = false;
 
-    $scope.user = userService.actualUser;
+    $scope.loggedIn = false;
+    $scope.responseArrived = true;
 
     $scope.checkExistingEmail = function () {
-        $scope.emailExists = false;
-        userService.actualUser = JSON.parse(JSON.stringify(userService.getUserByEmail($scope.emailAddress)));
-        $scope.user = userService.actualUser;
-        if (userService.actualUser.id != 0) {
-            $scope.emailExists = true;
+        if ($scope.signForm.emailAdd.$valid) {
+            $scope.emailExists = false;
+            $scope.responseArrived = false;
+            userService.getUserByEmail($scope.emailAddress)
+            .then(function (result) {
+                $scope.$parent.actualUser = result;
+                if ($scope.$parent.actualUser.id != 0) {
+                    $scope.emailExists = true;
+                }
+                $scope.responseArrived = true;
+            });
         }
     };
 
     $scope.login = function () {
-        if ($scope.password == userService.actualUser.password) {
+        if ($scope.password == $scope.$parent.actualUser.password && $scope.signForm.emailAdd.$valid) {
             $scope.loggedIn = true;
             $scope.incorrectPassword = false;
-            if (userService.actualUser.type == "borrower") {
+            if ($scope.$parent.actualUser.type == "borrower") {
                 $scope.borrower = true;
             }
             else {
@@ -120,12 +139,22 @@ librarianApp.controller('SignInCtrl', function ($scope, $location, userService) 
             $scope.incorrectPassword = true;
         }
     };
+
     $scope.register = function () {
         if ($scope.signForm.emailAdd.$valid && $scope.signForm.password.$valid) {
-            userService.addNewUser({ id: userService.generateNewId(), name: "Anonymous", email: $scope.emailAddress, password: $scope.password, type: "borrower", gender: "none", age: "0" });
-            userService.actualUser = JSON.parse(JSON.stringify(userService.getUserByEmail($scope.emailAddress)));
-            $scope.user = userService.actualUser;
-            $scope.login();
+            var newUser = { id: 0, name: "Anonymous", email: $scope.emailAddress, password: $scope.password, type: "borrower", gender: "none", age: "0" };
+            $scope.responseArrived = false;
+            userService.addNewUser(newUser)                     //ADD NEW USER
+            .then(function (result) {
+                $scope.$parent.actualUser = result;
+
+                userService.getUsers()                          //UPDATE USERS
+                .then(function (result) {
+                    $scope.$parent.users = result;
+                    $scope.responseArrived = true;
+                    $scope.login();                             //LOGIN
+                });
+            });
         }
     };
     $scope.logout = function () {
@@ -136,7 +165,18 @@ librarianApp.controller('SignInCtrl', function ($scope, $location, userService) 
         $scope.password = "";
         $scope.emailExists = false;
         $scope.incorrectPassword = false;
-        userService.actualUser.id = 0;
+        $scope.$parent.actualUser.id = 0;
         $location.path("/");
     }
 });
+
+/// User settings
+librarianApp.controller('userSettingsCtrl', function ($scope, userService) {
+    $scope.deleteUser = function(id) {
+        userService.deleteUser(id)
+        .then(function () {
+            //TODO: update users, logout, homepage
+        });
+    }
+});
+

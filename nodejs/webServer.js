@@ -1,14 +1,29 @@
 var express = require('express');
-var app = express();
+var bodyParser = require('body-parser');
 var path = require('path');
 var fs = require('fs');
 
+var app = express();
+app.use(bodyParser.json());
+
 /// --------------------------------------- ""Database"" --------------------------------------- ///
-var usersArray = {
-    users:
+var usersArray = 
     [{ id: 1, name: "Marvelous Librarian", email: "li@li.li", password: "li", type: "librarian", gender: "male", age: "50" },
-    { id: 2, name: "Marvelous Borrower", email: "bo@bo.bo", password: "bo", type: "borrower", gender: "female", age: "24" }]
-};
+    { id: 2, name: "Marvelous Borrower", email: "bo@bo.bo", password: "bo", type: "borrower", gender: "female", age: "24" }];
+
+/// --------------------------------------- DB functions --------------------------------------- ///
+function generateId() {
+    var newId = 0;
+    var usersLength = usersArray.length;
+    for (var i = 0; i < usersLength; i++) {
+        if (usersArray[i].id > newId) {
+            newId = usersArray[i].id;
+        }
+    }
+    newId = newId + 1;
+    return newId;
+}
+
 
 /// --------------------------------------- Homepage --------------------------------------- ///
 app.get('/', function (req, res) {
@@ -19,15 +34,39 @@ app.get('/', function (req, res) {
 app.get('/getUsers', function (req, res) {
     res.json(usersArray);
 })
-
-/// --------------------------------------- Add data --------------------------------------- ///
-app.post('/addUser', function (req, res) {
+app.get('/getUserByEmail/(:email|*)', function (req, res) {
+    var email = req.params.email;
+    var usersLength = usersArray.length;
+    var userToReturn = { id: 0, name: "", email: "", password: "", type: "", gender: "", age: "" };
+    for (var i = 0; i < usersLength; i++) {
+        if (usersArray[i].email == email) {
+            userToReturn = usersArray[i];
+        }
+    } 
+    setTimeout(function () { res.json(userToReturn); }, 1000);
     
 })
 
-/// --------------------------------------- Delete data --------------------------------------- ///
-app.delete('/deleteUser', function (req, res) {
 
+/// --------------------------------------- Add data --------------------------------------- ///
+app.post('/addUser', function (req, res) {
+    var newUser = req.body;
+    newUser.id = generateId();
+    usersArray.push(newUser);
+    res.json(newUser);
+})
+
+/// --------------------------------------- Delete data --------------------------------------- ///
+app.delete('/deleteUser/:id', function (req, res) {
+    var id = req.params.id;
+    var maxIndex = usersArray.length - 1;
+    for (var i = maxIndex; i >= 0; i--) {
+        if (usersArray[i].id == id){
+            usersArray.splice(i, 1);
+            break;
+        }
+    }
+    res.end('success');
 })
 
 /// ---------------- Get files from directories/or homepage in case path is invalid ---------------- ///
