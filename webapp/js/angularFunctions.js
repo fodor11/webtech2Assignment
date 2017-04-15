@@ -24,8 +24,7 @@ librarianApp.config(function ($routeProvider) {
         controller: 'userSettingsCtrl'
     })
     .otherwise({
-        templateUrl: 'services.html',
-        controller: 'servicesController'
+        redirectTo: '/'
     });
 });
 
@@ -33,19 +32,7 @@ librarianApp.config(function ($routeProvider) {
 librarianApp.factory('userService', function ($http, $q) {
     var userServiceInstance = {};
 
-    userServiceInstance.getUserByEmail = function (email) {
-        var deferred = $q.defer();
-        $http.get("/getUserByEmail/" + email)
-        .then(function successCallback(response) {
-            deferred.resolve(response.data);
-            
-        }, function errorCallback(reponse) {
-            alert('Could not get user by email :( \n email: ' + email);
-            return deferred.reject(response.data);
-        });
-        return deferred.promise;
-    }
-
+    /// ¡¡¡¡¡¡¡¡¡¡¡¡¡ only for testing purposes ¡¡¡¡¡¡¡¡¡¡¡¡¡
     userServiceInstance.getUsers = function () {
         var deferred = $q.defer();
         $http.get("/getUsers")
@@ -53,6 +40,19 @@ librarianApp.factory('userService', function ($http, $q) {
             deferred.resolve(response.data);
         }, function errorCallback(reponse) {
             alert('Could not get users :(');
+            return deferred.reject(response.data);
+        });
+        return deferred.promise;
+    }
+    /// ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+    userServiceInstance.getUserByEmail = function (email) {
+        var deferred = $q.defer();
+        $http.get("/getUserByEmail/" + email)
+        .then(function successCallback(response) {
+            deferred.resolve(response.data);
+        }, function errorCallback(reponse) {
+            alert('Could not get user by email :( \n email: ' + email);
             return deferred.reject(response.data);
         });
         return deferred.promise;
@@ -85,28 +85,111 @@ librarianApp.factory('userService', function ($http, $q) {
     return userServiceInstance;
 });
 
+librarianApp.factory('loginService', function ($http, $q) {
+    var loginServiceInstance = {};
+
+    loginServiceInstance.getLoggedInUser = function () {
+        var deferred = $q.defer();
+        $http.get("/getLoggedInUser")
+        .then(function successCallback(response) {
+            deferred.resolve(response.data);
+
+        }, function errorCallback(reponse) {
+            alert('Could not get logged in user :(');
+            return deferred.reject(response.data);
+        });
+        return deferred.promise;
+    }
+
+    loginServiceInstance.login = function (id) {
+        var deferred = $q.defer();
+        $http.post("/login/" + id)
+        .then(function successCallback(response) {
+            deferred.resolve(response.data);
+
+        }, function errorCallback(reponse) {
+            alert('Could not log in user :(');
+            return deferred.reject(response.data);
+        });
+        return deferred.promise;
+    }
+
+    loginServiceInstance.logout = function (id) {
+        var deferred = $q.defer();
+        $http.post("/logout/" + id)
+        .then(function successCallback(response) {
+            deferred.resolve(response.data);
+        }, function errorCallback(reponse) {
+            alert('Could not log out user :(');
+            return deferred.reject(response.data);
+        });
+        return deferred.promise;
+    }
+
+    return loginServiceInstance;
+});
+
 /// ------------------------------------ Controllers ------------------------------------ ///
-librarianApp.controller('librarianController', function ($scope, userService, $http) {
-    $scope.actualUser = { id: 0, name: "Anonymous", email: "", password: "", type: "borrower", gender: "none", age: "0" };
+librarianApp.controller('librarianController', function ($scope, userService, loginService, $location) {
+    $scope.actualUser = { id: 0, name: "Anonymous", email: "", password: "", type: "borrower", gender: "none", age: "0", loggedIn: false };
     $scope.users = [];
+    $scope.librarian = false;
+    $scope.borrower = false;
+    $scope.loggedIn = false;
+
+    $scope.login = function () {
+        loginService.login($scope.actualUser.id)
+        .then(function (result) {
+            $scope.actualUser = result;
+            if ($scope.actualUser.type == "borrower") {
+                $scope.borrower = true;
+            }
+            else {
+                $scope.librarian = true;
+            }
+            $scope.loggedIn = $scope.actualUser.loggedIn;
+        });
+    }
+    $scope.logout = function () {
+        loginService.logout($scope.actualUser.id)
+        .then(function (result) {
+            $scope.librarian = false;
+            $scope.borrower = false;
+            $scope.loggedIn = false;
+            $scope.actualUser.id = 0;
+            $scope.actualUser.loggedIn = $scope.actualUser.loggedIn;
+            $location.path("/");
+        });
+    }
 
     userService.getUsers()
     .then(function (result) {
         $scope.users = result;
     });
+    loginService.getLoggedInUser()
+    .then(function (result) {
+        console.log('get logged in user');
+        $scope.actualUser = result;
+        if ($scope.actualUser.loggedIn == true) {
+            console.log($scope.actualUser.name + 'is logged in');
+            $scope.loggedIn = true;
+            if ($scope.actualUser.type == "borrower") {
+                $scope.borrower = true;
+            }
+            else {
+                $scope.librarian = true;
+            }
+        }
+    });
 });
 
 /// Sign in
-librarianApp.controller('signInCtrl', function ($scope, $location, userService, $http) {
+librarianApp.controller('signInCtrl', function ($scope, userService, loginService) {
     $scope.emailAddress = "";
     $scope.password = "";
     $scope.emailExists = false;
     $scope.incorrectPassword = false;
 
-    $scope.librarian = false;
-    $scope.borrower = false;
-
-    $scope.loggedIn = false;
     $scope.responseArrived = true;
 
     $scope.checkExistingEmail = function () {
@@ -126,14 +209,7 @@ librarianApp.controller('signInCtrl', function ($scope, $location, userService, 
 
     $scope.login = function () {
         if ($scope.password == $scope.$parent.actualUser.password && $scope.signForm.emailAdd.$valid) {
-            $scope.loggedIn = true;
-            $scope.incorrectPassword = false;
-            if ($scope.$parent.actualUser.type == "borrower") {
-                $scope.borrower = true;
-            }
-            else {
-                $scope.librarian = true;
-            }
+            $scope.$parent.login();
         }
         else {
             $scope.incorrectPassword = true;
@@ -147,7 +223,6 @@ librarianApp.controller('signInCtrl', function ($scope, $location, userService, 
             userService.addNewUser(newUser)                     //ADD NEW USER
             .then(function (result) {
                 $scope.$parent.actualUser = result;
-
                 userService.getUsers()                          //UPDATE USERS
                 .then(function (result) {
                     $scope.$parent.users = result;
@@ -158,15 +233,12 @@ librarianApp.controller('signInCtrl', function ($scope, $location, userService, 
         }
     };
     $scope.logout = function () {
-        $scope.loggedIn = false;
-        $scope.librarian = false;
-        $scope.borrower = false;
         $scope.emailAddress = "";
         $scope.password = "";
         $scope.emailExists = false;
         $scope.incorrectPassword = false;
-        $scope.$parent.actualUser.id = 0;
-        $location.path("/");
+
+        $scope.$parent.logout();
     }
 });
 
@@ -175,7 +247,12 @@ librarianApp.controller('userSettingsCtrl', function ($scope, userService) {
     $scope.deleteUser = function(id) {
         userService.deleteUser(id)
         .then(function () {
-            //TODO: update users, logout, homepage
+            //TODO: update users, logout
+            userService.getUsers()                          //UPDATE USERS
+            .then(function (result) {
+                $scope.$parent.users = result;
+                $scope.$parent.logout();
+            });
         });
     }
 });
