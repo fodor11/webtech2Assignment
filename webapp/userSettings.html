@@ -5,13 +5,78 @@
 
                 <div class="media">
                   <div class="media-left media-middle">
-                    <i class="fa fa-book"></i>
+                    <i class="fa fa-gears fa-3x"></i>
                   </div>
                   <div class="media-body">
-                    <h4 class="media-heading">Books</h4>
-                    <p>-- Edit user details --</p>
-                    <button class="btn btn-primary my-btn dark" ng-click="deleteUser(actualUser.id)">Delete User</button>
-                  </div>
+                    <h2 class="media-heading">User settings</h2>
+
+                      <form id="userDetails" name="userDetails">
+                      <p ng-bind="message"/>
+                        <div class="form-group row media">
+                          <div class="media-left media-middle"><label for="nameField" class="col-md-2 col-form-label">Name</label></div>
+                          <div class="media-body">
+                            <input type="text" class="form-control" id="nameField" placeholder="Name" ng-model="formData.name" required>
+                          </div>
+                        </div>
+                        <div class="form-group row media">
+                          <div class="media-left media-middle"><label for="ageField" class="col-md-2 col-form-label">Age</label></div>
+                          <div class="media-body">
+                            <input type="number" class="form-control" id="ageField" placeholder="Age" ng-model="formData.age" required>
+                          </div>
+                        </div>
+                        <div class="form-group row media">
+                          <div class="media-left media-middle"><label for="genderField" class="col-md-2 col-form-label">Gender</label></div>
+                          <div class="media-body">
+                            <div class="form-check form-check-inline">
+                              <label class="form-check-label">
+                                <input class="form-check-input" type="radio" name="gender" ng-model="formData.gender" value="male"> Male
+                              </label>
+                            </div>
+                            <div class="form-check form-check-inline">
+                              <label class="form-check-label">
+                                <input class="form-check-input" type="radio" name="gender" ng-model="formData.gender" value="female"> Female
+                              </label>
+                            </div>
+                            <div class="form-check form-check-inline">
+                              <label class="form-check-label">
+                                <input class="form-check-input" type="radio" name="gender" ng-model="formData.gender" value="other"> Other
+                              </label>
+                            </div>
+                          </div>
+                        </div>
+                        <div class="form-group row media">
+                          <div class="media-left media-middle"><label for="emailField" class="col-md-2 col-form-label">Email</label></div>
+                          <div class="media-body">
+                            <input type="email" class="form-control" id="emailField" placeholder="Email" ng-model="formData.email" required>
+                          </div>
+                        </div>
+                        <div class="form-group row media">
+                          <div class="media-left media-middle"><label for="passwordField" class="col-md-2 col-form-label">Password</label></div>
+                          <div class="media-body">
+                            <input type="password" class="form-control" id="passwordField" placeholder="Password" ng-model="formData.password" required>
+                          </div>
+                        </div>
+                        <div class="form-group row media">
+                          <div class="media-left media-middle"><label class="col-md-2 col-form-label">Permission</label></div>
+                          <div class="media-body">
+                            <div class="form-check form-check-inline">
+                              <label class="form-check-label">
+                                <input class="form-check-input" type="radio" name="permission" ng-model="formData.type" value="borrower"> Borrower
+                              </label>
+                            </div>
+                            <div class="form-check form-check-inline">
+                              <label class="form-check-label">
+                                <input class="form-check-input" type="radio" name="permission" ng-model="formData.type" value="librarian"> Librarian
+                              </label>
+                            </div>
+                          </div>
+                        </div>
+                        <div class="media">
+                            <div class="media-left"><button class="btn btn-primary my-btn dark" ng-disabled="!userDetails.$dirty" ng-click="save()" scroll-to="scrollToDiv">Save</button></div>
+                            <div class="media-right"><button class="btn btn-primary my-btn dark" ng-click="deleteUser(actualUser.id)" scroll-to="tf-home">Delete User</button></div>
+                        </div>
+                      </form>
+                   </div>
                 </div>
 
             </div>

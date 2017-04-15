@@ -136,14 +136,15 @@ a:active{
 
 .media-left.media-middle i {
 	padding: 20px 30px 20px 0;
-	font-size: 30px;
+	font-size: 50px;
 	color: rgb(47, 147, 123);
 
 }
 
-.media-body h4 {
+.media-body h2 {
+	margin-left: 10px;
 	margin-bottom: 20px;
-	font-size: 16px;
+	font-size: 26px;
 	font-weight: 700;
 	color: rgb(47, 147, 123);
 }
@@ -271,20 +272,23 @@ ul.why-me li{
 	text-align: center;
 }
 
-form#contact {
+form#userDetails {
 	padding: 5%;
 	background: #f1f1f1;
 	outline: 6px solid rgba(34, 34, 34, 0.08);
 }
 
-#tf-contact input.form-control {
-	height: 40px;
+form#userDetails .media-left {
+	min-width: 15%;
 }
 
-#tf-contact .form-control{
+#tf-service input.form-control {
+	height: 55px;
+}
+
+#tf-service .form-control{
 	display: block;
 	width: 100%;
-	margin-bottom: 20px;
 	padding: 16px 12px;
 	font-size: 14px;
 	line-height: 1.42857143;
@@ -300,16 +304,17 @@ form#contact {
 	-o-transition: none;
 	transition: all 0.8s;
 }
-#tf-contact .form-control:focus,
-#tf-contact .form-control:hover{
+#tf-service .form-control:focus,
+#tf-service .form-control:hover{
 	border-top: 2px solid #2F937B;
 }
+#tf-service .form-check.form-check-inline{
+	display: inline-block;
+	margin-right: 10px;
+}
+
 nav#tf-footer {
 	background: #222222;
 	padding: 3% 0 2% 0;
 	color: #f1f1f1;
-}
-
-.ng-hide {
-  height: 0;
 }

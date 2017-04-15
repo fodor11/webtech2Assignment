@@ -63,7 +63,7 @@
                         <span class="icon-bar"></span>
                       </button>
 
-                      <a class="navbar-brand logo" href="/">Librarian</a>
+                      <a class="navbar-brand logo" href="#!/" scroll-to="tf-home">Librarian</a>
                     </div>
 
                     <!-- Collect the nav links, forms, and other content for toggling -->
@@ -96,8 +96,8 @@
                     </div>
                     <div class="media-right media-middle" ng-show="!loggedIn">
                         <form id="signIn" class="form-signin" name="signForm">
-                            <h3 class="form-signin-heading">Sign In                            
-                            <i ng-show="!responseArrived" class="fa fa-spinner fa-lg fa-spin" aria-hidden="true"></i>                            </h3>
+                            <h3 class="form-signin-heading">Sign In
+                            <i ng-show="!responseArrived" class="fa fa-spinner fa-lg fa-spin" aria-hidden="true"></i> </h3>
 
                             <p><input type="email" name="emailAdd" class="form-control" placeholder="Email" required ng-model="emailAddress" ng-blur="checkExistingEmail()"/></p>  
                             <p ng-show="signForm.emailAdd.$error.email">Please enter a valid email address</p>

@@ -8,8 +8,8 @@ app.use(bodyParser.json());
 
 /// --------------------------------------- ""Database"" --------------------------------------- ///
 var usersArray = 
-    [{ id: 1, name: "Marvelous Librarian", email: "li@li.li", password: "li", type: "librarian", gender: "male", age: "50", loggedIn: false },
-    { id: 2, name: "Marvelous Borrower", email: "bo@bo.bo", password: "bo", type: "borrower", gender: "male", age: "24", loggedIn: false }];
+    [{ id: 1, name: "Marvelous Librarian", email: "li@li.li", password: "li", type: "librarian", gender: "male", age: 50, loggedIn: false },
+    { id: 2, name: "Marvelous Borrower", email: "bo@bo.bo", password: "bo", type: "borrower", gender: "male", age: 24, loggedIn: false }];
 
 var booksArray =
     [{ id: 1, title: "How not to fck shit up", author: 1, genre: "education", quantity: "4", requests: [] },
@@ -70,12 +70,25 @@ app.get('/getLoggedInUser', function (req, res) {
 })
 
 
-/// --------------------------------------- Add data --------------------------------------- ///
+/// --------------------------------------- Post data --------------------------------------- ///
 app.post('/addUser', function (req, res) {
     var newUser = req.body;
     newUser.id = generateId();
     usersArray.push(newUser);
     res.json(newUser);
+})
+
+app.post('/updateUser', function (req, res) {
+    var updatedUser = req.body;
+    var usersLength = usersArray.length;
+    var userToReturn;
+    for (var i = 0; i < usersLength; i++) {
+        if (usersArray[i].id == updatedUser.id) {
+            usersArray[i] = updatedUser;
+            userToReturn = usersArray[i];
+        }
+    }
+    res.json(userToReturn);
 })
 
 app.post('/login/:id', function (req, res) {

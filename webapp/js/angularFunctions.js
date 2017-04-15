@@ -70,6 +70,18 @@ librarianApp.factory('userService', function ($http, $q) {
         return deferred.promise;
     }
 
+    userServiceInstance.updateUser = function (updatedUser) {
+        var deferred = $q.defer();
+        $http.post("/updateUser", updatedUser)
+        .then(function successCallback(response) {
+            deferred.resolve(response.data);
+        }, function errorCallback(reponse) {
+            alert('Could not add user :(');
+            return deferred.reject(response.data);
+        });
+        return deferred.promise;
+    }
+
     userServiceInstance.deleteUser = function (idToDelete) {
         var deferred = $q.defer();
         $http.delete("/deleteUser/" + idToDelete)
@@ -184,7 +196,7 @@ librarianApp.controller('librarianController', function ($scope, userService, lo
 });
 
 /// Sign in
-librarianApp.controller('signInCtrl', function ($scope, userService, loginService) {
+librarianApp.controller('signInCtrl', function ($scope, $timeout, userService, loginService) {
     $scope.emailAddress = "";
     $scope.password = "";
     $scope.emailExists = false;
@@ -210,6 +222,12 @@ librarianApp.controller('signInCtrl', function ($scope, userService, loginServic
     $scope.login = function () {
         if ($scope.password == $scope.$parent.actualUser.password && $scope.signForm.emailAdd.$valid) {
             $scope.$parent.login();
+            $timeout(function () {          /// needed so that the default "field required" browser message would not show up
+                $scope.emailAddress = "";
+                $scope.password = "";
+                $scope.emailExists = false;
+                $scope.incorrectPassword = false;
+            }, 1);
         }
         else {
             $scope.incorrectPassword = true;
@@ -233,22 +251,63 @@ librarianApp.controller('signInCtrl', function ($scope, userService, loginServic
         }
     };
     $scope.logout = function () {
-        $scope.emailAddress = "";
-        $scope.password = "";
-        $scope.emailExists = false;
-        $scope.incorrectPassword = false;
-
         $scope.$parent.logout();
     }
 });
 
 /// User settings
 librarianApp.controller('userSettingsCtrl', function ($scope, userService) {
+    $scope.formData = angular.copy($scope.$parent.actualUser);
+    $scope.changes = false;
+    $scope.message = "";
+
+    $scope.checkChanges = function () {
+        if ($scope.userDetails.$dirty) {
+            if ($scope.formData.name != $scope.$parent.actualUser.name ||
+            $scope.formData.age != $scope.$parent.actualUser.age ||
+            $scope.formData.gender != $scope.$parent.actualUser.gender ||
+            $scope.formData.email != $scope.$parent.actualUser.email ||
+            $scope.formData.password != $scope.$parent.actualUser.password ||
+            $scope.formData.type != $scope.$parent.actualUser.type) {
+                $scope.changes = true;
+            }
+            else {
+                $scope.message = "No changes have been done.";
+            }
+        }
+    }
+
+    $scope.save = function () {
+        $scope.message = "";
+        $scope.changes = false;
+        $scope.checkChanges();
+        $scope.userDetails.$setPristine();
+        if ($scope.userDetails.$valid && $scope.changes)
+        {
+            userService.updateUser($scope.formData)
+            .then(function (result) {
+                $scope.$parent.actualUser = result;
+                if ($scope.$parent.actualUser.type == "borrower") {
+                    $scope.$parent.borrower = true;
+                    $scope.$parent.librarian = false;
+                }
+                else {
+                    $scope.$parent.borrower = false;
+                    $scope.$parent.librarian = true;
+                }
+                $scope.message = "All changes have been saved.";
+                userService.getUsers()
+                .then(function (result) {
+                    $scope.$parent.users = result;
+                });
+            });
+        }
+    }
+
     $scope.deleteUser = function(id) {
         userService.deleteUser(id)
         .then(function () {
-            //TODO: update users, logout
-            userService.getUsers()                          //UPDATE USERS
+            userService.getUsers()
             .then(function (result) {
                 $scope.$parent.users = result;
                 $scope.$parent.logout();
