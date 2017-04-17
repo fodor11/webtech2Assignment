@@ -141,6 +141,151 @@ librarianApp.factory('loginService', function ($http, $q) {
     return loginServiceInstance;
 });
 
+librarianApp.factory('bookService', function ($http, $q) {
+    var bookServiceInstance = {};
+
+    bookServiceInstance.getBooks = function () {
+        var deferred = $q.defer();
+        $http.get("/getBooks")
+        .then(function successCallback(response) {
+            deferred.resolve(response.data);
+        }, function errorCallback(reponse) {
+            alert('Could not get books :(');
+            return deferred.reject(response.data);
+        });
+        return deferred.promise;
+    }
+
+    bookServiceInstance.getBookById = function (id) {
+        var deferred = $q.defer();
+        $http.get("/getBookById/" + id)
+        .then(function successCallback(response) {
+            deferred.resolve(response.data);
+        }, function errorCallback(reponse) {
+            alert('Could not get book by id :(');
+            return deferred.reject(response.data);
+        });
+        return deferred.promise;
+    }
+
+    bookServiceInstance.addBook = function (book) {
+        var deferred = $q.defer();
+        $http.post("/addBook", book)
+        .then(function successCallback(response) {
+            deferred.resolve(response.data);
+        }, function errorCallback(reponse) {
+            alert('Could not add book :(');
+            return deferred.reject(response.data);
+        });
+        return deferred.promise;
+    }
+
+    bookServiceInstance.addBookInstance = function (bookId, quantity) {
+        var deferred = $q.defer();
+        $http.post("/addInstance/" + bookId + "/" + quantity)
+        .then(function successCallback(response) {
+            deferred.resolve(response.data);
+        }, function errorCallback(reponse) {
+            alert('Could not add book instance :(');
+            return deferred.reject(response.data);
+        });
+        return deferred.promise;
+    }
+
+    bookServiceInstance.lendBook = function (bookId, userId) {
+        var deferred = $q.defer();
+        $http.post("/lendBook/" + bookId + "/to/" + userId)
+        .then(function successCallback(response) {
+            deferred.resolve(response.data);
+        }, function errorCallback(reponse) {
+            alert('Could not lend book :(');
+            return deferred.reject(response.data);
+        });
+        return deferred.promise;
+    }
+
+    bookServiceInstance.requestBook = function (bookId, userId) {
+        var deferred = $q.defer();
+        $http.post("/request/" + bookId + "/by/" + userId)
+        .then(function successCallback(response) {
+            deferred.resolve(response.data);
+        }, function errorCallback(reponse) {
+            alert('Could not request book :(');
+            return deferred.reject(response.data);
+        });
+        return deferred.promise;
+    }
+
+    bookServiceInstance.deleteBook = function (bookId) {
+        var deferred = $q.defer();
+        $http.delete("/deleteBook/" + bookId)
+        .then(function successCallback(response) {
+            deferred.resolve(response.data);
+        }, function errorCallback(reponse) {
+            alert('Could not delete book :(');
+            return deferred.reject(response.data);
+        });
+        return deferred.promise;
+    }
+
+    return bookServiceInstance;
+});
+
+librarianApp.factory('authorService', function ($http, $q) {
+    var authorServiceInstance = {};
+
+    authorServiceInstance.getAuthors = function () {
+        var deferred = $q.defer();
+        $http.get("/getAuthors")
+        .then(function successCallback(response) {
+            deferred.resolve(response.data);
+        }, function errorCallback(reponse) {
+            alert('Could not get authors :(');
+            return deferred.reject(response.data);
+        });
+        return deferred.promise;
+    }
+
+    authorServiceInstance.getAuthorById = function (id) {
+        var deferred = $q.defer();
+        $http.get("/getAuthorById/" + id)
+        .then(function successCallback(response) {
+            deferred.resolve(response.data);
+        }, function errorCallback(reponse) {
+            alert('Could not get author by id :(');
+            return deferred.reject(response.data);
+        });
+        return deferred.promise;
+    }
+
+    authorServiceInstance.addAuthor = function (author) {
+        var deferred = $q.defer();
+        $http.post("/addAuthor", author)
+        .then(function successCallback(response) {
+            deferred.resolve(response.data);
+        }, function errorCallback(reponse) {
+            alert('Could not add author :(');
+            return deferred.reject(response.data);
+        });
+        return deferred.promise;
+    }
+
+    authorServiceInstance.deleteAuthor = function (authorId) {
+        var deferred = $q.defer();
+        $http.delete("/deleteAuthor/" + authorId)
+        .then(function successCallback(response) {
+            deferred.resolve(response.data);
+        }, function errorCallback(reponse) {
+            alert('Could not delete author :(');
+            return deferred.reject(response.data);
+        });
+        return deferred.promise;
+    }
+
+    return bookServiceInstance;
+});
+
+
 /// ------------------------------------ Controllers ------------------------------------ ///
 librarianApp.controller('librarianController', function ($scope, userService, loginService, $location) {
     $scope.actualUser = { id: 0, name: "Anonymous", email: "", password: "", type: "borrower", gender: "none", age: "0", loggedIn: false };
