@@ -7,17 +7,24 @@ var app = express();
 app.use(bodyParser.json());
 
 /// --------------------------------------- ""Database"" --------------------------------------- ///
-var usersArray = 
-    [{ id: 1, name: "Marvelous Librarian", email: "li@li.li", password: "li", type: "librarian", gender: "male", age: 50, loggedIn: false },
-    { id: 2, name: "Marvelous Borrower", email: "bo@bo.bo", password: "bo", type: "borrower", gender: "male", age: 24, loggedIn: false }];
+var usersArray =
+    [{ id: 1, name: "Marvelous Librarian", email: "li@li.li", password: "li", type: "librarian", gender: "male", age: 50, loggedIn: false, owned: [2, 3, 4] },
+    { id: 2, name: "Marvelous Borrower", email: "bo@bo.bo", password: "bo", type: "borrower", gender: "male", age: 24, loggedIn: false, owned: [1, 5, 6, 7] }];
 
 var booksArray =
     [{ id: 1, title: "How not to fck shit up", author: 1, genre: "education", quantity: 4, requests: [] },
-    { id: 2, title: "How to do nothing", author: 2, genre: "freeTime", quantity: 0, requests: [] }];
+    { id: 2, title: "How to do nothing", author: 2, genre: "freetime", quantity: 0, requests: [] },
+    { id: 3, title: "Cpp reference", author: 3, genre: "education", quantity: 2, requests: [] },
+    { id: 4, title: "Avoiding dog crap on the sidewalk", author: 1, genre: "education", quantity: 7, requests: [2] },
+    { id: 5, title: "Finding dog crap in the park", author: 2, genre: "education", quantity: 6, requests: [] },
+    { id: 6, title: "Me neither", author: 4, genre: "drama", quantity: 10, requests: [1] },
+    { id: 7, title: "Last time i got up late...", author: 4, genre: "action", quantity: 8, requests: [1] }];
 
 var authorsArray =
     [{ id: 1, name: "Life itself", dateOfBirth: "-1000000" },
-    { id: 2, name: "Dumass", dateOfBirth: "2004.11.23" }];
+    { id: 2, name: "Dumass", dateOfBirth: "2004.11.23" },
+    { id: 3, name: "unknown", dateOfBirth: "0.0.0" },
+    { id: 4, name: "definitely not me", dateOfBirth: "1995.12.19" }];
 
 
 
@@ -71,7 +78,7 @@ app.get('/getUsers', function (req, res) {
 app.get('/getUserByEmail/(:email|*)', function (req, res) {
     var email = req.params.email;
     var usersLength = usersArray.length;
-    var userToReturn = { id: 0, name: "", email: "", password: "", type: "", gender: "", age: "" };
+    var userToReturn = { id: 0, name: "", email: "", password: "" };
     for (var i = 0; i < usersLength; i++) {
         if (usersArray[i].email == email) {
             userToReturn = usersArray[i];
@@ -81,7 +88,7 @@ app.get('/getUserByEmail/(:email|*)', function (req, res) {
     
 })
 app.get('/getLoggedInUser', function (req, res) {
-    var userToReturn = { id: 0, name: "", email: "", password: "", type: "", gender: "", age: "", loggedIn: false };
+    var userToReturn = { id: 0, name: "", email: "", password: "", loggedIn: false };
     var usersLength = usersArray.length;
     for (var i = 0; i < usersLength; i++) {
         if (usersArray[i].loggedIn == true) {
@@ -148,7 +155,7 @@ app.post('/updateUser', function (req, res) {
 app.post('/login/:id', function (req, res) {
     var id = req.params.id;
     var usersLength = usersArray.length;
-    var userToReturn = { id: 0, name: "", email: "", password: "", type: "", gender: "", age: "", loggedIn: false };
+    var userToReturn = { id: 0, name: "", email: "", password: "", type: "", gender: "", age: 0, loggedIn: false };
     for (var i = 0; i < usersLength; i++) {
         if (usersArray[i].id == id) {
             usersArray[i].loggedIn = true;
@@ -161,7 +168,7 @@ app.post('/login/:id', function (req, res) {
 app.post('/logout/:id', function (req, res) {
     var id = req.params.id;
     var usersLength = usersArray.length;
-    var userToReturn = { id: 0, name: "", email: "", password: "", type: "", gender: "", age: "", loggedIn: false };
+    var userToReturn = { id: 0, name: "", email: "", password: "", type: "", gender: "", age: 0, loggedIn: false };
     for (var i = 0; i < usersLength; i++) {
         if (usersArray[i].id == id) {
             usersArray[i].loggedIn = false;
@@ -205,19 +212,21 @@ app.post('/addAuthor', function (req, res) {
 })
 
 app.post('/lendBook/:bookId/to/:userId', function (req, res) {
-    var bookId = req.params.bookId;
-    var userId = req.params.userId;
+    var bookId = parseInt(req.params.bookId);
+    var userId = parseInt(req.params.userId);
     var booksLength = booksArray.length;
     var found = false;
     var bookToReturn;
     for (var i = 0; i < booksLength; i++) {
-        if (booksArray[i].id == bookId){                                // find book
+        if (booksArray[i].id == bookId) {                                // find book
+
             var requests = booksArray[i].requests;
-            var requestsMax = booksArray[i].requests.length - 1;
+            var requestsMax = requests.length - 1;
             for (var j = requestsMax; j >= 0; j--) {
                 if (requests[j] == userId) {                            //find user request
                     requests.splice(j, 1);
                     booksArray[i].quantity -= 1;
+                    usersArray[usersArray.map(function (e) { return e.id; }).indexOf(userId)].owned.push(bookId);
                     found = true;
                     break;
                 }
@@ -235,8 +244,8 @@ app.post('/lendBook/:bookId/to/:userId', function (req, res) {
 })
 
 app.post('/request/:bookId/by/:userId', function (req, res) {
-    var bookId = req.params.bookId;
-    var userId = req.params.userId;
+    var bookId = parseInt(req.params.bookId);
+    var userId = parseInt(req.params.userId);
     var booksLength = booksArray.length;
     var found = false;
     var bookToReturn;

@@ -318,3 +318,11 @@ nav#tf-footer {
 	padding: 3% 0 2% 0;
 	color: #f1f1f1;
 }
+
+.icon-invisible {
+    visibility: hidden;
+}
+
+th {
+	cursor: default;
+}

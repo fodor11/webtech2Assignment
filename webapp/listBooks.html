@@ -8,8 +8,44 @@
                     <i class="fa fa-book"></i>
                   </div>
                   <div class="media-body">
-                    <h4 class="media-heading">Books</h4>
-                    <p>-- List of books --</p>
+                    <h2 class="media-heading">List of books</h2>
+                    <div class="table-responsive">
+                        <table class="table table-striped table-hover">
+                            <tr>
+                                <th ng-click="orderByTitle()">Title 
+                                    <i class="fa fa-sort-asc fa-fw" ng-show="order == '+title'"></i>
+                                    <i class="fa fa-sort-desc fa-fw" ng-show="order == '-title'"></i>
+                                    <!-- Acts as a placeholder, so table columns are not dancing when other icons are turned on or off-->
+                                    <i class="fa fa-sort-asc fa-fw icon-invisible" ng-show="order != '+title' && order != '-title'"></i>
+                                </th>
+                                <th ng-click="orderByAuthor()">Author 
+                                    <i class="fa fa-sort-asc fa-fw" ng-show="order == '+authorName'"></i>
+                                    <i class="fa fa-sort-desc fa-fw" ng-show="order == '-authorName'"></i>
+                                    <i class="fa fa-sort-asc fa-fw icon-invisible" ng-show="order != '+authorName' && order != '-authorName'"></i>
+                                </th>
+                                <th ng-click="orderByGenre()">Genre 
+                                    <i class="fa fa-sort-asc fa-fw" ng-show="order == '+genre'"></i>
+                                    <i class="fa fa-sort-desc fa-fw" ng-show="order == '-genre'"></i>
+                                    <i class="fa fa-sort-asc fa-fw icon-invisible" ng-show="order != '+genre' && order != '-genre'"></i>
+                                </th>
+                                <th ng-click="orderByStatus()">Status 
+                                    <i class="fa fa-sort-asc fa-fw" ng-show="order == '+status'"></i>
+                                    <i class="fa fa-sort-desc fa-fw" ng-show="order == '-status'"></i>
+                                    <i class="fa fa-sort-asc fa-fw icon-invisible" ng-show="order != '+status' && order != '-status'"></i>
+                                </th>
+                            </tr>
+                            <tr ng-repeat="book in books | orderBy: order">
+                                <td>{{book.title}}</td>
+                                <td>{{book.authorName}}</td>
+                                <td>{{book.genre}}</td>
+                                <td>
+                                    <span ng-show="book.status == 'requested'">Already requested</span>
+                                    <span ng-show="book.status == 'owned'">Owned</span>
+                                    <button ng-show="book.status == 'none'" ng-click="requestBook(book.id)">Request book</button>
+                                </td>
+                            </tr>
+                        </table>
+                    </div>
                   </div>
                 </div>
 

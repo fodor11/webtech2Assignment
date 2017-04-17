@@ -17,7 +17,8 @@ librarianApp.config(function ($routeProvider) {
         templateUrl: 'manageRentals.html'
     })
     .when('/listBooks', {
-        templateUrl: 'listBooks.html'
+        templateUrl: 'listBooks.html',
+        controller: 'listBooksCtrl'
     })
     .when('/userSettings', {
         templateUrl: 'userSettings.html',
@@ -282,7 +283,7 @@ librarianApp.factory('authorService', function ($http, $q) {
         return deferred.promise;
     }
 
-    return bookServiceInstance;
+    return authorServiceInstance;
 });
 
 
@@ -381,7 +382,7 @@ librarianApp.controller('signInCtrl', function ($scope, $timeout, userService, l
 
     $scope.register = function () {
         if ($scope.signForm.emailAdd.$valid && $scope.signForm.password.$valid) {
-            var newUser = { id: 0, name: "Anonymous", email: $scope.emailAddress, password: $scope.password, type: "borrower", gender: "none", age: "0" };
+            var newUser = { id: 0, name: "Anonymous", email: $scope.emailAddress, password: $scope.password, type: "borrower", gender: "other", age: 0, loggedIn: false, owned: [] };
             $scope.responseArrived = false;
             userService.addNewUser(newUser)                     //ADD NEW USER
             .then(function (result) {
@@ -461,3 +462,83 @@ librarianApp.controller('userSettingsCtrl', function ($scope, userService) {
     }
 });
 
+/// List books and request book
+librarianApp.controller('listBooksCtrl', function ($scope, bookService, authorService) {
+    
+    $scope.books = [];
+
+    $scope.order = '+title';
+    $scope.orderByTitle = function () {
+        if ($scope.order == "+title") {
+            $scope.order = "-title";
+        }
+        else {
+            $scope.order = "+title";
+        }
+    }
+    $scope.orderByAuthor = function () {
+        if ($scope.order == "+authorName") {
+            $scope.order = "-authorName";
+        }
+        else {
+            $scope.order = "+authorName";
+        }
+    }
+    $scope.orderByGenre = function () {
+        if ($scope.order == "+genre") {
+            $scope.order = "-genre";
+        }
+        else {
+            $scope.order = "+genre";
+        }
+    }
+    $scope.orderByStatus = function () {
+        if ($scope.order == "+status") {
+            $scope.order = "-status";
+        }
+        else {
+            $scope.order = "+status";
+        }
+    }
+    
+    $scope.setStatus = function () {
+        var booksLength = $scope.books.length;
+        for (var i = 0; i < booksLength; i++) {
+            if ($scope.books[i].requests.indexOf($scope.$parent.actualUser.id) != -1) {
+                $scope.books[i].status = 'requested';
+            }
+            else if ($scope.$parent.actualUser.owned.indexOf($scope.books[i].id) != -1) {
+                $scope.books[i].status = 'owned';
+            }
+            else {
+                $scope.books[i].status = 'none';
+            }
+        }
+    }
+    $scope.setAuthorNames = function () {
+        authorService.getAuthors()
+        .then(function (result) {
+            var booksLength = $scope.books.length;
+            for (var i = 0; i < booksLength; i++) {
+                $scope.books[i].authorName = result[result.map(function (e) { return e.id; }).indexOf($scope.books[i].author)].name;
+            }
+        });
+    }
+    $scope.updateBooks = function () {
+        bookService.getBooks()
+        .then(function (result) {
+            $scope.books = result;
+            $scope.setStatus();
+            $scope.setAuthorNames();
+        });
+    }
+
+    $scope.requestBook = function (id) {
+        bookService.requestBook(id, $scope.$parent.actualUser.id)
+        .then(function () {
+            $scope.updateBooks();
+        });
+    }
+
+    $scope.updateBooks();
+});
