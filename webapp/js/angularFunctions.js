@@ -1,5 +1,5 @@
 /// Librarian Application 
-var librarianApp = angular.module('librarianApp', ['smoothScroll', 'ngRoute']);
+var librarianApp = angular.module('librarianApp', ['smoothScroll', 'ngRoute', 'ui.bootstrap']);
 
 /// ------------------------------------ Routing ------------------------------------ ///
 librarianApp.config(function ($routeProvider) {
@@ -8,13 +8,16 @@ librarianApp.config(function ($routeProvider) {
         templateUrl: 'services.html'
     })
     .when('/manageBooks', {
-        templateUrl: 'manageBooks.html'
+        templateUrl: 'manageBooks.html',
+        controller: ''
     })
     .when('/manageInventory', {
-        templateUrl: 'manageInventory.html'
+        templateUrl: 'manageInventory.html',
+        controller: ''
     })
     .when('/manageRentals', {
-        templateUrl: 'manageRentals.html'
+        templateUrl: 'manageRentals.html',
+        controller: 'rentalsCtrl'
     })
     .when('/listBooks', {
         templateUrl: 'listBooks.html',
@@ -46,6 +49,19 @@ librarianApp.factory('userService', function ($http, $q) {
         return deferred.promise;
     }
     /// ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    
+    userServiceInstance.getUserById = function (id) {
+        var deferred = $q.defer();
+        $http.get("/getUserById/" + id)
+        .then(function successCallback(response) {
+            deferred.resolve(response.data);
+        }, function errorCallback(reponse) {
+            alert('Could not get user by id :( \n id: ' + id);
+            return deferred.reject(response.data);
+        });
+        return deferred.promise;
+    }
+
 
     userServiceInstance.getUserByEmail = function (email) {
         var deferred = $q.defer();
@@ -157,6 +173,18 @@ librarianApp.factory('bookService', function ($http, $q) {
         return deferred.promise;
     }
 
+    bookServiceInstance.getRequestedBooks = function () {
+        var deferred = $q.defer();
+        $http.get("/getRequestedBooks")
+        .then(function successCallback(response) {
+            deferred.resolve(response.data);
+        }, function errorCallback(reponse) {
+            alert('Could not get requested books :(');
+            return deferred.reject(response.data);
+        });
+        return deferred.promise;
+    }
+
     bookServiceInstance.getBookById = function (id) {
         var deferred = $q.defer();
         $http.get("/getBookById/" + id)
@@ -200,6 +228,18 @@ librarianApp.factory('bookService', function ($http, $q) {
             deferred.resolve(response.data);
         }, function errorCallback(reponse) {
             alert('Could not lend book :(');
+            return deferred.reject(response.data);
+        });
+        return deferred.promise;
+    }
+
+    bookServiceInstance.dismissBookRequest = function (bookId, userId) {
+        var deferred = $q.defer();
+        $http.post("/dismissBook/" + bookId + "/from/" + userId)
+        .then(function successCallback(response) {
+            deferred.resolve(response.data);
+        }, function errorCallback(reponse) {
+            alert('Could not delete bookrequest :(');
             return deferred.reject(response.data);
         });
         return deferred.promise;
@@ -373,7 +413,7 @@ librarianApp.controller('signInCtrl', function ($scope, $timeout, userService, l
                 $scope.password = "";
                 $scope.emailExists = false;
                 $scope.incorrectPassword = false;
-            }, 1);
+            }, 10);
         }
         else {
             $scope.incorrectPassword = true;
@@ -539,6 +579,89 @@ librarianApp.controller('listBooksCtrl', function ($scope, bookService, authorSe
             $scope.updateBooks();
         });
     }
+    $scope.updateBooks();
+});
 
+/// List requests, rent books, add book instance
+librarianApp.controller('rentalsCtrl', function ($scope, bookService, authorService, userService, $uibModal) {
+    $scope.books = [];
+    $scope.actualbook = {};
+
+    $scope.setAuthorNames = function () {
+        authorService.getAuthors()
+        .then(function (result) {
+            var booksLength = $scope.books.length;
+            for (var i = 0; i < booksLength; i++) {
+                $scope.books[i].authorName = result[result.map(function (e) { return e.id; }).indexOf($scope.books[i].author)].name;
+            }
+        });
+    }
+    $scope.parseUsers = function () {
+        userService.getUsers().then(function (users) {
+            var booksLength = $scope.books.length;
+            for (var i = 0; i < booksLength; i++) {
+                $scope.books[i].users = [];
+                var usersLength = $scope.books[i].requests.length;
+                for (var j = 0; j < usersLength; j++) {
+                    var user = users[users.map(function (e) { return e.id; }).indexOf($scope.books[i].requests[j])];
+                    $scope.books[i].users.push({ id: user.id, name: user.name});
+                }
+            }
+        });
+    }
+    $scope.updateBooks = function () {
+        bookService.getRequestedBooks()
+        .then(function (result) {
+            $scope.books = result;
+            $scope.setAuthorNames();
+            $scope.parseUsers();
+        });
+    }
+    $scope.updateUser = function () {
+        userService.getUserById($scope.$parent.actualUser.id)
+        .then(function (result) {
+            $scope.$parent.actualUser = result;
+        });
+    }
+
+    $scope.lend = function (bookId, userId) {
+        bookService.lendBook(bookId, userId)
+        .then(function () {
+            var bookIndex = $scope.books.map(function (e) { return e.id; }).indexOf(bookId);
+            $scope.books[bookIndex].users.splice($scope.books[bookIndex].users.map(function (e) { return e.id; }).indexOf(userId), 1);
+            $scope.books[bookIndex].quantity -= 1;
+            if ($scope.books[bookIndex].users.length == 0) {
+                $scope.modalObj.dismiss('cancel');
+            }
+        });
+    }
+    $scope.dismiss = function (bookId, userId) {
+        bookService.dismissBookRequest(bookId, userId)
+        .then(function () {
+            var bookIndex = $scope.books.map(function (e) { return e.id; }).indexOf(bookId);
+            $scope.books[bookIndex].users.splice($scope.books[bookIndex].users.map(function (e) { return e.id; }).indexOf(userId), 1);
+            if ($scope.books[bookIndex].users.length == 0) {
+                $scope.modalObj.dismiss('cancel');
+            }
+        });
+    }
+
+    $scope.modalObj = {};
+    $scope.toggleModal = function (bookId) {
+        var bookIndex = $scope.books.map(function (e) { return e.id; }).indexOf(bookId);
+        $scope.actualbook = $scope.books[bookIndex];
+        $scope.modalObj = $uibModal.open({
+            animation: true,
+            ariaLabelledBy: 'modal-title',
+            ariaDescribedBy: 'modal-body',
+            templateUrl: 'requestsModal.html',
+            scope: $scope,
+            appendTo: angular.element(document.querySelector('#tf-service'))
+        });
+        $scope.modalObj.result.catch(function () {
+            $scope.updateBooks();
+            $scope.updateUser();
+        });
+    }
     $scope.updateBooks();
 });

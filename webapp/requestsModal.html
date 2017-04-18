@@ -1,0 +1,22 @@
+<!--<div class="modal fade" role="dialog">-->
+<!--    <div class="modal-dialog">-->
+        <div class="modal-content">
+            <div class="modal-header">
+                <h4 class="modal-title" id="modal-title">Lend '{{actualbook.title}}'</h4>
+            </div>
+            <div class="modal-body" id="modal-body">
+                <table class="table table-striped table-hover" ng-show="actualbook.users.length != 0">
+                    <tr><th>Name</th><th>Quantity</th><th>Action</th></tr>
+                    <tr ng-repeat="user in actualbook.users">
+                        <td ng-bind="user.name" />
+                        <td ng-bind="actualbook.quantity" />
+                        <td>
+                            <button ng-click="lend(actualbook.id, user.id)" ng-disabled="actualbook.quantity <= 0">Lend</button>
+                            <button ng-click="dismiss(actualbook.id, user.id)" >Dismiss</button>
+                        </td>
+                    </tr>
+                </table>
+            </div>
+       </div>
+<!--    </div>-->
+<!--</div>-->

@@ -85,7 +85,17 @@ app.get('/getUserByEmail/(:email|*)', function (req, res) {
         }
     } 
     setTimeout(function () { res.json(userToReturn); }, 1000);
-    
+})
+app.get('/getUserById/(:id|*)', function (req, res) {
+    var id = parseInt(req.params.id);
+    var usersLength = usersArray.length;
+    var userToReturn = { id: 0, name: "", email: "", password: "" };
+    for (var i = 0; i < usersLength; i++) {
+        if (usersArray[i].id == id) {
+            userToReturn = usersArray[i];
+        }
+    }
+    res.json(userToReturn);
 })
 app.get('/getLoggedInUser', function (req, res) {
     var userToReturn = { id: 0, name: "", email: "", password: "", loggedIn: false };
@@ -102,6 +112,17 @@ app.get('/getLoggedInUser', function (req, res) {
 app.get('/getBooks', function (req, res) {
     res.json(booksArray);
 })
+app.get('/getRequestedBooks', function (req, res) {
+    var requestedBooks = [];
+    var booksLength = booksArray.length;
+    for (var i = 0; i < booksLength; i++) {
+        if (booksArray[i].requests.length != 0) {
+            requestedBooks.push(booksArray[i]);
+        }
+    }
+    res.json(requestedBooks);
+})
+
 app.get('/getBookById/(:id|*)', function (req, res) {
     var id = req.params.id;
     var booksLength = booksArray.length;
@@ -243,6 +264,36 @@ app.post('/lendBook/:bookId/to/:userId', function (req, res) {
     }
 })
 
+app.post('/dismissBook/:bookId/from/:userId', function (req, res) {
+    var bookId = parseInt(req.params.bookId);
+    var userId = parseInt(req.params.userId);
+    var booksLength = booksArray.length;
+    var found = false;
+    var bookToReturn;
+    for (var i = 0; i < booksLength; i++) {
+        if (booksArray[i].id == bookId) {                                // find book
+
+            var requests = booksArray[i].requests;
+            var requestsMax = requests.length - 1;
+            for (var j = requestsMax; j >= 0; j--) {
+                if (requests[j] == userId) {                            //find user request
+                    requests.splice(j, 1);
+                    found = true;
+                    break;
+                }
+            }
+            bookToReturn = booksArray[i];
+            break;
+        }
+    }
+    if (found) {
+        res.json(bookToReturn);
+    }
+    else {
+        res.end('failure');
+    }
+})
+
 app.post('/request/:bookId/by/:userId', function (req, res) {
     var bookId = parseInt(req.params.bookId);
     var userId = parseInt(req.params.userId);
@@ -267,7 +318,7 @@ app.post('/request/:bookId/by/:userId', function (req, res) {
 
 /// --------------------------------------- Delete data --------------------------------------- ///
 app.delete('/deleteUser/:id', function (req, res) {
-    var id = req.params.id;
+    var id = parseInt(req.params.id);
     var found = false;
     var maxIndex = usersArray.length - 1;
     for (var i = maxIndex; i >= 0; i--) {
@@ -275,6 +326,14 @@ app.delete('/deleteUser/:id', function (req, res) {
             usersArray.splice(i, 1);
             found = true;
             break;
+        }
+    }
+    //delete the requests of this user
+    var booksLength = booksArray.length;
+    for (var i = 0; i < booksLength; i++) {
+        var requestIndex = booksArray[i].requests.indexOf(id);
+        if (requestIndex != -1) {
+            booksArray[i].requests.splice(requestIndex, 1);
         }
     }
     if (found) {
