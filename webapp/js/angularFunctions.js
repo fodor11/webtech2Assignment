@@ -9,11 +9,11 @@ librarianApp.config(function ($routeProvider) {
     })
     .when('/manageBooks', {
         templateUrl: 'manageBooks.html',
-        controller: ''
+        controller: 'manageBooksCtrl'
     })
     .when('/manageInventory', {
         templateUrl: 'manageInventory.html',
-        controller: ''
+        controller: 'inventoryCtrl'
     })
     .when('/manageRentals', {
         templateUrl: 'manageRentals.html',
@@ -582,7 +582,7 @@ librarianApp.controller('listBooksCtrl', function ($scope, bookService, authorSe
     $scope.updateBooks();
 });
 
-/// List requests, rent books, add book instance
+/// List requests, rent books
 librarianApp.controller('rentalsCtrl', function ($scope, bookService, authorService, userService, $uibModal) {
     $scope.books = [];
     $scope.actualbook = {};
@@ -663,5 +663,98 @@ librarianApp.controller('rentalsCtrl', function ($scope, bookService, authorServ
             $scope.updateUser();
         });
     }
+    $scope.updateBooks();
+});
+
+/// Add book instance
+librarianApp.controller('inventoryCtrl', function ($scope, bookService) {
+    $scope.books = [];
+    $scope.updateBooks = function () {
+        bookService.getBooks()
+        .then(function (result) {
+            $scope.books = result;
+            var booksLength = $scope.books.length;
+            for (var i = 0; i < booksLength; i++) {
+                $scope.books[i].addQuantity = 0;
+            }
+        });
+    }
+    $scope.addInstance = function (bookId, quantity) {
+        if (quantity > 0) {
+            bookService.addBookInstance(bookId, quantity)
+            .then(function (result) {
+                //doesn't fcking work, no fcking idea why tho
+                //$scope.books[$scope.books.map(function (e) { return e.id; }).indexOf(bookId)] = angular.copy(result);
+                $scope.updateBooks();
+            });
+        }
+    }
+    $scope.updateBooks();
+});
+
+librarianApp.controller('manageBooksCtrl', function ($scope, bookService, authorService, $timeout) {
+    $scope.newBook = { id: 0, title: "", author: 0, genre: "", quantity: 0, requests: [] };
+    $scope.newAuthor = { id: 0, name: "" };
+    $scope.successMessage = "";
+    $scope.authors = [];
+    $scope.books = [];
+
+    $scope.titleFieldMissing = false;
+    $scope.genreFieldMissing = false;
+    $scope.nameFieldMissing = false;
+
+    $scope.updateBooks = function () {
+        bookService.getBooks()
+        .then(function (result) {
+            $scope.books = result;
+        });
+    }
+    $scope.updateAuthors = function () {
+        authorService.getAuthors()
+        .then(function (result) {
+            $scope.authors = result;
+            $scope.newBook.author = $scope.authors[0].id;
+        });
+    }
+    $scope.addBook = function () {
+        if ($scope.addBookForm.$valid) {
+            bookService.addBook($scope.newBook);
+            $timeout(function () {          /// needed so that the default "field required" browser message would not show up
+                $scope.newBook = { id: 0, title: "", author: 0, genre: "", quantity: 0, requests: [] };
+                $scope.newBook.author = $scope.authors[0].id;
+            }, 10);
+            $scope.successMessage = "Book successfully saved!";
+
+            $scope.titleFieldMissing = false;
+            $scope.genreFieldMissing = false;
+            $scope.addBookForm.$setPristine();
+        }
+        else {
+            $scope.successMessage = "Could not save book, some required fields are empty";
+            if ($scope.newBook.title == "") {
+                $scope.titleFieldMissing = true;
+            }
+            else {
+                $scope.genreFieldMissing = true;
+            }
+        }
+    }
+    $scope.addAuthor = function () {
+        if ($scope.addAuthorForm.$valid) {
+            authorService.addAuthor($scope.newAuthor);
+            $timeout(function () {          /// needed so that the default "field required" browser message would not show up
+                $scope.newAuthor.name="";
+            }, 10);
+            $scope.successMessage = "Author successfully saved!";
+            $scope.nameFieldMissing = false;
+            $scope.addAuthorForm.$setPristine();
+            $scope.updateAuthors();
+        }
+        else {
+            $scope.successMessage = "Could not save author, name is missing";
+        }
+    }
+
+    $scope.updateAuthors();
     $scope.updateBooks();
 });

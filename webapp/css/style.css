@@ -272,13 +272,14 @@ ul.why-me li{
 	text-align: center;
 }
 
-form#userDetails {
+#tf-service form {
 	padding: 5%;
 	background: #f1f1f1;
 	outline: 6px solid rgba(34, 34, 34, 0.08);
+	margin-bottom: 30px;
 }
 
-form#userDetails .media-left {
+#tf-service form .media-left {
 	min-width: 15%;
 }
 
@@ -286,9 +287,12 @@ form#userDetails .media-left {
 	height: 55px;
 }
 
+#tf-service select.form-control {
+	height: 55px;
+}
+
 #tf-service .form-control{
 	display: block;
-	width: 100%;
 	padding: 16px 12px;
 	font-size: 14px;
 	line-height: 1.42857143;
@@ -345,4 +349,3 @@ th {
   text-align: left;
   vertical-align: middle;
 }
-

@@ -21,10 +21,10 @@ var booksArray =
     { id: 7, title: "Last time i got up late...", author: 4, genre: "action", quantity: 8, requests: [1] }];
 
 var authorsArray =
-    [{ id: 1, name: "Life itself", dateOfBirth: "-1000000" },
-    { id: 2, name: "Dumass", dateOfBirth: "2004.11.23" },
-    { id: 3, name: "unknown", dateOfBirth: "0.0.0" },
-    { id: 4, name: "definitely not me", dateOfBirth: "1995.12.19" }];
+    [{ id: 1, name: "Life itself" },
+    { id: 2, name: "Dumass" },
+    { id: 3, name: "unknown" },
+    { id: 4, name: "definitely not me" }];
 
 
 
@@ -141,7 +141,7 @@ app.get('/getAuthors', function (req, res) {
 app.get('/getAuthorById/(:id|*)', function (req, res) {
     var id = req.params.id;
     var authorsLength = authorsArray.length;
-    var authorToReturn = { id: 0, name: "", dateOfBirth: "" };
+    var authorToReturn = { id: 0, name: "" };
     for (var i = 0; i < authorsLength; i++) {
         if (authorsArray[i].id == id) {
             authorToReturn = authorsArray[i];
@@ -205,8 +205,8 @@ app.post('/addBook', function (req, res) {
     res.json(newBook);
 })
 app.post('/addInstance/:bookId/:quantity', function (req, res) {
-    var bookId = req.params.bookId;
-    var quantity = req.params.quantity;
+    var bookId = parseInt(req.params.bookId);
+    var quantity = parseInt(req.params.quantity);
     var booksLength = booksArray.length;
     var found = false;
     var bookToReturn;

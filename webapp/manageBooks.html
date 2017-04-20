@@ -1,15 +1,75 @@
 <div id="tf-service">
         <div class="container">
 
-            <div class="col-md-12">
+            <div class="col-md-10 col-md-offset-1">
 
                 <div class="media">
                   <div class="media-left media-middle">
                     <i class="fa fa-book"></i>
                   </div>
                   <div class="media-body">
-                    <h4 class="media-heading">Books</h4>
-                    <p>-- Add books & authors --</p>
+                    <h2 class="media-heading">New Book</h2>
+                    <p ng-bind="successMessage"/>
+                    <form id="addBookForm" name="addBookForm">
+                        <div class="form-group row media">
+                          <div class="media-left media-middle"><label for="titleField" class="col-md-2 col-form-label">Title</label></div>
+                          <div class="media-body">
+                            <input type="text" class="form-control" name="titleField" id="titleField" placeholder="Name" ng-model="newBook.title" required>
+                            <label ng-show="(!addBookForm.titleField.$valid && addBookForm.titleField.$dirty) || (titleFieldMissing && !addBookForm.titleField.$valid)"><small>Please enter a title for the book</small></label>
+                          </div>
+                        </div>
+                        
+                        <div class="form-group row media">
+                          <div class="media-left media-middle"><label for="genreField" class="col-md-2 col-form-label">Genre</label></div>
+                          <div class="media-body">
+                            <input type="text" class="form-control" name="genreField" id="genreField" placeholder="Genre" ng-model="newBook.genre" required>
+                            <label ng-show="(!addBookForm.genreField.$valid && addBookForm.genreField.$dirty) || (genreFieldMissing && !addBookForm.genreField.$valid)"><small>Please enter a genre for the book</small> </label>
+                          </div>
+                        </div>
+                        <div class="form-group row media">
+                          <div class="media-left media-middle"><label for="quantityField" class="col-md-2 col-form-label">Quantity</label></div>
+                          <div class="media-body">
+                            <input type="number" class="form-control" id="quantityField" ng-model="newBook.quantity" required>
+                          </div>
+                        </div>
+                        <div class="form-group row media">
+                          <div class="media-left media-middle"><label for="authorField" class="col-md-2 col-form-label">Author</label></div>
+                          <div class="media-body">
+                            <select id="authorField" class="form-control" ng-model="newBook.author" ng-options="author.id as author.name for author in authors"></select>
+                          </div>
+                        </div>
+
+                        <div class="form-group row">
+                            <button class="btn btn-primary my-btn dark" ng-disabled="!addBookForm.$dirty" ng-click="addBook()" scroll-to="scrollToDiv">Add book</button>
+                        </div>
+                      </form>
+                  </div>
+                </div>
+
+            </div>
+
+            <div class="col-md-10 col-md-offset-1">
+
+                <div class="media">
+                  <div class="media-left media-middle">
+                    <i class="fa fa-user"></i>
+                  </div>
+                  <div class="media-body">
+                    <h2 class="media-heading">New Author</h2>
+
+                    <form id="addAuthorForm" name="addAuthorForm">
+                        <div class="form-group row media">
+                          <div class="media-left media-middle"><label for="nameField" class="col-md-2 col-form-label">Name</label></div>
+                          <div class="media-body">
+                            <input type="text" class="form-control" name="nameField" id="nameField" placeholder="Name" ng-model="newAuthor.name" required>
+                            <label ng-show="(!addBookForm.nameField.$valid && addBookForm.nameField.$dirty) || (nameFieldMissing && !addBookForm.nameField.$valid)"><small>Please enter a name</small></label>
+                          </div>
+                        </div>
+                        <div class="form-group row">
+                            <button class="btn btn-primary my-btn dark" ng-disabled="!addAuthorForm.$dirty" ng-click="addAuthor()" scroll-to="scrollToDiv">Add author</button>
+                        </div>
+
+                      </form>
                   </div>
                 </div>
 
