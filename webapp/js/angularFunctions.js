@@ -455,6 +455,10 @@ librarianApp.controller('userSettingsCtrl', function ($scope, userService) {
             $scope.formData.email != $scope.$parent.actualUser.email ||
             $scope.formData.password != $scope.$parent.actualUser.password ||
             $scope.formData.type != $scope.$parent.actualUser.type) {
+                if ($scope.formData.age < 0) {
+                    $scope.formData.age = $scope.$parent.actualUser.age;
+                    $scope.message = "Age must not be less than 0!  ";
+                }
                 $scope.changes = true;
             }
             else {
@@ -481,7 +485,7 @@ librarianApp.controller('userSettingsCtrl', function ($scope, userService) {
                     $scope.$parent.borrower = false;
                     $scope.$parent.librarian = true;
                 }
-                $scope.message = "All changes have been saved.";
+                $scope.message += "All changes have been saved.";
                 userService.getUsers()
                 .then(function (result) {
                     $scope.$parent.users = result;
@@ -683,7 +687,7 @@ librarianApp.controller('inventoryCtrl', function ($scope, bookService) {
         if (quantity > 0) {
             bookService.addBookInstance(bookId, quantity)
             .then(function (result) {
-                //doesn't fcking work, no fcking idea why tho
+                //doesn't work, no idea why tho
                 //$scope.books[$scope.books.map(function (e) { return e.id; }).indexOf(bookId)] = angular.copy(result);
                 $scope.updateBooks();
             });
@@ -717,7 +721,7 @@ librarianApp.controller('manageBooksCtrl', function ($scope, bookService, author
         });
     }
     $scope.addBook = function () {
-        if ($scope.addBookForm.$valid) {
+        if ($scope.addBookForm.$valid && $scope.newBook.quantity >= 0) {
             bookService.addBook($scope.newBook);
             $timeout(function () {          /// needed so that the default "field required" browser message would not show up
                 $scope.newBook = { id: 0, title: "", author: 0, genre: "", quantity: 0, requests: [] };
@@ -730,12 +734,15 @@ librarianApp.controller('manageBooksCtrl', function ($scope, bookService, author
             $scope.addBookForm.$setPristine();
         }
         else {
-            $scope.successMessage = "Could not save book, some required fields are empty";
+            $scope.successMessage = "Could not save book, some required fields are empty or not valid";
             if ($scope.newBook.title == "") {
                 $scope.titleFieldMissing = true;
             }
-            else {
+            else if ($scope.newBook.genre == "") {
                 $scope.genreFieldMissing = true;
+            }
+            else if ($scope.newBook.quantity < 0) {
+                $scope.quantityFieldMessage = true;
             }
         }
     }
