@@ -366,10 +366,9 @@ librarianApp.controller('librarianController', function ($scope, userService, lo
     });
     loginService.getLoggedInUser()
     .then(function (result) {
-        console.log('get logged in user');
         $scope.actualUser = result;
         if ($scope.actualUser.loggedIn == true) {
-            console.log($scope.actualUser.name + 'is logged in');
+            //console.log($scope.actualUser.name + ' is logged in');
             $scope.loggedIn = true;
             if ($scope.actualUser.type == "borrower") {
                 $scope.borrower = true;
@@ -671,12 +670,22 @@ librarianApp.controller('rentalsCtrl', function ($scope, bookService, authorServ
 });
 
 /// Add book instance
-librarianApp.controller('inventoryCtrl', function ($scope, bookService) {
+librarianApp.controller('inventoryCtrl', function ($scope, bookService, authorService) {
     $scope.books = [];
+    $scope.setAuthorNames = function () {
+        authorService.getAuthors()
+        .then(function (result) {
+            var booksLength = $scope.books.length;
+            for (var i = 0; i < booksLength; i++) {
+                $scope.books[i].authorName = result[result.map(function (e) { return e.id; }).indexOf($scope.books[i].author)].name;
+            }
+        });
+    }
     $scope.updateBooks = function () {
         bookService.getBooks()
         .then(function (result) {
             $scope.books = result;
+            $scope.setAuthorNames();
             var booksLength = $scope.books.length;
             for (var i = 0; i < booksLength; i++) {
                 $scope.books[i].addQuantity = 0;
